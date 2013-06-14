@@ -99,6 +99,7 @@ define(["require", "module"], function(require, module){
 		// Common application level tests
 		has.add("dom-addeventlistener", !!document.addEventListener);
 		has.add("touch", "ontouchstart" in document || window.navigator.msMaxTouchPoints > 0);
+		has.add("pointer", !!window.navigator.msPointerEnabled);
 		// I don't know if any of these tests are really correct, just a rough guess
 		has.add("device-width", screen.availWidth || innerWidth);
 

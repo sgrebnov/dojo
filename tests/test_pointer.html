@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+		<title>Dojo Pointer events Testing</title>
+		<style type="text/css">
+
+			html, body, #main {
+			    height: 100%;
+			    width: 100%;
+			    margin: 0px;
+			    padding: 0px;
+			}
+
+			#main > div {
+				width: 100%;
+			}
+
+			#touchpad {
+				height: 100px;
+				text-align: center;
+				background-color: #eee;
+			}
+
+			#log {
+				height: 500px;
+				background-color: rgb(3, 38, 38);
+				color: white;
+				overflow: hidden;
+				overflow: scroll;
+			}
+
+			.box {
+				display: -webkit-box;      
+				display: -moz-box;         
+				display: -ms-flexbox;	    
+				display: box;     
+
+				-ms-flex-direction: column; 				
+				-webkit-box-orient: vertical;
+				-moz-box-orient: vertical;
+				box-orien: vertical;
+			}
+
+			.flex1 {
+				-webkit-box-flex: 1;      
+				-moz-box-flex: 1;                      
+				-webkit-flex: 1;          
+				-ms-flex: 1;              
+				flex: 1;
+			}
+			
+		</style>
+		<script type="text/javascript" src="../dojo.js" data-dojo-config="async: true"></script>
+		<script>
+			require([
+				"dojo/dom",
+				"dojo/pointer",
+				"dojo/on",
+				"dojo/has",
+				"dojo/domReady!"
+			], function(dom, pointer, on, has){
+				var touchpad = dom.byId("touchpad"),
+				events = [pointer.down, pointer.move, pointer.up, pointer.cancel, 
+					pointer.over, pointer.out, pointer.enter, pointer.leave],
+
+				onTouchPadEvent = function(event) {
+					var logEntry = {
+						event: event.type,
+						pointerType: event.pointerType,
+						pointerId: event.pointerId,
+						clientX: event.clientX,
+						clientY: event.clientY,
+						buttons: event.buttons,
+						target: event.target ? event.target.id : null
+					}
+
+					var msg = JSON.stringify(logEntry) + "<br/>",
+						log = dom.byId("log");
+
+        			log.innerHTML = msg + log.innerHTML;
+    			};
+
+				events.forEach(function(event) {
+					on(touchpad, event, onTouchPadEvent);
+				});
+
+			});
+
+			
+
+		</script>
+	</head>
+	<body>
+		<div id="main" class="box">
+			<div id="touchpad">Touch here!</div>
+			<div id="log" class="flex1"></div>	
+		</div>
+	</body>
+</html>

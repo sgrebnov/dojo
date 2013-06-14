@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+    <title>Dojo Pointer Testing</title>
+
+    <style type="text/css">
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        canvas {
+            touch-action: none;
+            -ms-touch-action: none;
+            -webkit-user-select: none;
+            background-color: #add8e6;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+    </style>
+
+    <script type="text/javascript" src="../dojo.js" data-dojo-config="async: true"></script>
+
+    <script>
+        require([
+            "dojo/_base/array",
+            "dojo/dom",
+            "dojo/_base/lang",
+            "dojo/pointer",
+            "dojo/on",
+            "dojo/has",
+            "dojo/domReady!"
+        ], function(array, dom, lang, pointer, on, has){
+
+            function Painter(canvas) {
+                var canvas = canvas,
+                    ctx = canvas.getContext("2d"),
+                    requestAnimFrame,
+                    pointers = {},
+                    lines = {},
+
+                    start = function() {
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                        bindEvents();
+                        requestAnimFrame = getRequestAnimFrame();
+                        requestAnimFrame(renderLoop, this);
+                    },
+
+                    bindEvents = function () {
+                        on(canvas, pointer.down, pointerDownHandler);
+                        on(canvas, pointer.up, pointerUpHandler);
+                        on(canvas, pointer.move, pointerMoveHandler);
+                    },
+
+                    pointerDownHandler = function(e) {
+                        var brush = getBrush();
+                        ctx.lineWidth = brush.width;
+                        ctx.lineCap = brush.cap;
+                        ctx.strokeStyle = brush.color;
+                        pointers[e.pointerId] = getPointer(e.clientX, e.clientY);
+                    },
+
+                    pointerUpHandler = function(e) {
+                        delete pointers[e.pointerId];
+                    },
+
+                    pointerMoveHandler = function(e) {
+                        var pointer = pointers[e.pointerId];
+                        if (pointer) {
+                            pointer.setTarget(e.clientX, e.clientY);
+                        }
+                    },
+
+                    getBrush = function() {
+                        var minWidth = 5,
+                            maxWidth = 20,
+                            caps = ["round", "square"];
+                        return {
+                            color: getRandomColor(),
+                            width: getRandomNum(minWidth,maxWidth),
+                            cap: getRandomElement(caps)
+                        }
+                    },
+
+                    getRandomColor = function () {
+                        var letters = '0123456789ABCDEF'.split(''),
+                            color = '#';
+                        for (var i = 0; i < 6; i++ ) {
+                            color += letters[Math.round(Math.random() * 15)];
+                        }
+                        return color;
+                    },
+
+                    getRandomNum = function(min, max) {
+                        return (Math.random() * (max - min) + min);
+                    },
+
+                    getRandomElement = function(array) {
+                        return array[Math.floor(Math.random() * array.length)];
+                    },
+
+                    getPointer = function (x, y) {
+                        return {
+                            x:x,
+                            y:y,
+
+                            setTarget: function(x, y) {
+                                this.targetX = x;
+                                this.targetY = y;
+                            },
+
+                            updatePoint : function() {
+                                this.x = this.targetX;
+                                this.y = this.targetY;
+                            },
+
+                            isPointChanged: function() {
+                                return this.targetX && this.targetY && (this.x != this.targetX || this.y != this.targetY);
+                            }
+                        }
+                    },
+
+                    getRequestAnimFrame = function() {
+                        return  window.requestAnimationFrame ||
+                                window.webkitRequestAnimationFrame ||
+                                window.mozRequestAnimationFrame    ||
+                                window.oRequestAnimationFrame      ||
+                                window.msRequestAnimationFrame     ||
+                                function( callback ){
+                                    window.setTimeout(callback, 1000 / 60);
+                                };
+                    },
+
+                    renderLoop = function(lastRender) {
+                        for (var pointerId in pointers) {
+                            var pointer = pointers[pointerId];
+                            if (pointer.isPointChanged()) {
+                                ctx.beginPath();
+                                ctx.moveTo(pointer.x, pointer.y);
+                                ctx.lineTo(pointer.targetX, pointer.targetY);
+                                ctx.stroke();
+                                ctx.closePath();
+                                pointer.updatePoint();
+                            }
+                        }
+                        requestAnimFrame(renderLoop, this);
+                    };
+
+                return {
+                    start: start
+                }
+            };
+
+            var canvas = dom.byId("canvas"),
+                painter = new Painter(canvas);
+            painter.start();
+
+        });
+    </script>
+</head>
+<body>
+    <div class="mainContainer">
+        <canvas width="480" height="800" id="canvas"></canvas>
+    </div>
+</body>
+</html>
