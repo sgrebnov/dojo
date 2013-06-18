@@ -41,7 +41,7 @@
                     ctx = canvas.getContext("2d"),
                     requestAnimFrame,
                     pointers = {},
-                    lines = {},
+                    brushes = {},
 
                     start = function() {
                         canvas.width = window.innerWidth;
@@ -59,14 +59,13 @@
 
                     pointerDownHandler = function(e) {
                         var brush = getBrush();
-                        ctx.lineWidth = brush.width;
-                        ctx.lineCap = brush.cap;
-                        ctx.strokeStyle = brush.color;
+                        brushes[e.pointerId] = brush;
                         pointers[e.pointerId] = getPointer(e.clientX, e.clientY);
                     },
 
                     pointerUpHandler = function(e) {
                         delete pointers[e.pointerId];
+                        delete brushes[e.pointerId];
                     },
 
                     pointerMoveHandler = function(e) {
@@ -138,8 +137,12 @@
 
                     renderLoop = function(lastRender) {
                         for (var pointerId in pointers) {
-                            var pointer = pointers[pointerId];
+                            var pointer = pointers[pointerId],
+                                brush = brushes[pointerId];
                             if (pointer.isPointChanged()) {
+                                ctx.lineWidth = brush.width;
+                                ctx.lineCap = brush.cap;
+                                ctx.strokeStyle = brush.color;
                                 ctx.beginPath();
                                 ctx.moveTo(pointer.x, pointer.y);
                                 ctx.lineTo(pointer.targetX, pointer.targetY);
@@ -160,6 +163,12 @@
                 painter = new Painter(canvas);
             painter.start();
 
+            // Prevents bouncy scrolling on mobile webkit browsers
+            on(document, "touchmove", function(e) {
+                if (e.target == canvas) {
+                    event.preventDefault();
+                }
+            });
         });
     </script>
 </head>

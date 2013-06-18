@@ -50,7 +50,7 @@
 				-ms-flex: 1;              
 				flex: 1;
 			}
-			
+
 		</style>
 		<script type="text/javascript" src="../dojo.js" data-dojo-config="async: true"></script>
 		<script>
@@ -79,16 +79,22 @@
 					var msg = JSON.stringify(logEntry) + "<br/>",
 						log = dom.byId("log");
 
-        			log.innerHTML = msg + log.innerHTML;
-    			};
+					log.innerHTML = msg + log.innerHTML;
+				};
 
 				events.forEach(function(event) {
 					on(touchpad, event, onTouchPadEvent);
 				});
 
+				// Prevents bouncy scrolling on mobile webkit browsers
+				on(document, "touchmove", function(e) {
+					if (e.target == touchpad) {
+						event.preventDefault();
+					}
+				});
 			});
 
-			
+
 
 		</script>
 	</head>
