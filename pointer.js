@@ -117,7 +117,7 @@ function(dojo, aspect, dom, domClass, lang, on, has, mouse, domReady, win){
                                 "isPrimary": isPrimary,
                                 "pointerId" : (evt.identifier || 0) + 102, // Touch identifiers can start at 0 so we add some value to the touch identifier for compatibility.
                                 "pageX" : evt.pageX, "pageY" : evt.pageY,
-                                "clientX" : evt.clientX || evt.pageX , "clientY" : evt.clientY || evt.pageY, // TODO - tmp, investigate and remove '|| evt.pageXY'
+                                "clientX" : evt.clientX, "clientY" : evt.clientY,
                                 "screenX" : evt.screenX, "screenY" : evt.screenY,
                                 "currentTarget" : evt.target, "target" : evt.target
                             }
@@ -149,7 +149,11 @@ function(dojo, aspect, dom, domClass, lang, on, has, mouse, domReady, win){
          * @return {Event} A new Pointer event built from 'originalEvent' and with new properties from `properties`.
          */
         PointerEvent = function(originalEvent, properties) {
-            
+            // In some tests Dojo uses custom events which don't have clientX/Y properties. For such cases we
+            // add clientX/Y manually and set its value equal to pageX/Y
+            originalEvent.clientX = originalEvent.clientX || originalEvent.pageX;
+            originalEvent.clientY = originalEvent.clientY || originalEvent.pageY;
+
             var type = properties.type,
                 p = lang.mixin(originalEvent, properties), // combine all properties so it is easy to use         
                 pointerEvent;                
@@ -169,14 +173,17 @@ function(dojo, aspect, dom, domClass, lang, on, has, mouse, domReady, win){
             }
 
             // override properties
-            Object.defineProperty(pointerEvent, 'srcElement', {get: function(){ return  p.srcElement}, enumerable: true});
-            Object.defineProperty(pointerEvent, 'target', {get: function(){ return  p.target}, enumerable: true});
-            Object.defineProperty(pointerEvent, 'pageX', {get: function(){ return  p.pageX}, enumerable: true});
-            Object.defineProperty(pointerEvent, 'pageY', {get: function(){ return  p.pageY}, enumerable: true});
+            ["srcElement", "target", "currentTarget", "pageX", "pageY"].forEach( function(prop) {
+                Object.defineProperty(pointerEvent, prop, {get: function(){ return  p[prop]}, enumerable: true});
+            });
 
             // preventDefault functionality
             pointerEvent.preventDefault = function() {
                 originalEvent.preventDefault();
+            }
+
+            pointerEvent.stopPropagation = function() {
+                originalEvent.stopPropagation();
             }
                         
             // TODO comment
