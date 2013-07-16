@@ -99,7 +99,24 @@ define(["require", "module"], function(require, module){
 		// Common application level tests
 		has.add("dom-addeventlistener", !!document.addEventListener);
 		has.add("touch", "ontouchstart" in document || window.navigator.msMaxTouchPoints > 0);
-		has.add("pointer", !!window.navigator.msPointerEnabled);
+
+		// Pointer events strings
+		has.add("pointer", function(){
+
+			// IE10, IE11
+			if(window.navigator.msPointerEnabled) {
+				return  "MSPointer";
+			}
+
+			// future modern browsers
+			if(window.navigator.msPointerEnabled) { 
+				return "Pointer"; // assume unperfixed pointers support in new browsers
+			}
+
+			return null;
+
+		});
+
 		// I don't know if any of these tests are really correct, just a rough guess
 		has.add("device-width", screen.availWidth || innerWidth);
 
