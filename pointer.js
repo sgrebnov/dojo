@@ -414,8 +414,8 @@ function(dojo, aspect, dom, domClass, lang, on, has, mouse, domReady, win){
 		cancel: bindEvent("PointerCancel", mouse.leave, "touchcancel", pointerModule + "Cancel"),
 		over: bindEvent("PointerOver", "mouseover", "dojotouchover", pointerModule + "Over"),
 		out: bindEvent("PointerOut", "mouseout", "dojotouchout", pointerModule + "Out"),
-		enter: bindEvent("PointerEnter", "mouseover","dojotouchover", pointerModule + "Over"),
-		leave: bindEvent("PointerLeave", "mouseout", "dojotouchout", pointerModule + "Out")
+		enter: bindEvent("PointerEnter", "mouseover","dojotouchover", pointerModule + "Enter"),
+		leave: bindEvent("PointerLeave", "mouseout", "dojotouchout", pointerModule + "Leave")
 	};
 
 
